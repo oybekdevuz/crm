@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { Roles } from '../decorator/role';
+import { CheckToken } from '../guards/check-token.guard';
 
 @ApiTags('order')
 @Controller('order')
@@ -9,12 +11,16 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
+  @Roles('admin', 'casher')
+  @UseGuards(CheckToken)
   @ApiOperation({ summary: 'Create a new order' })
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.orderService.create(createOrderDto);
   }
 
   @Get('all/:marketId')
+  @Roles('admin', 'casher')
+  @UseGuards(CheckToken)
   @ApiOperation({ summary: 'Get orders filtered by market ID and date range or for today' })
   @ApiParam({ name: 'marketId', description: 'Market ID', type: Number })
   @ApiQuery({ name: 'startDate', description: 'Start date for filtering (optional)', required: false })
@@ -28,6 +34,8 @@ export class OrderController {
   }
 
   @Get('one/:id/:marketId')
+  @Roles('admin', 'casher')
+  @UseGuards(CheckToken)
   @ApiOperation({ summary: 'Get a single order by ID and market ID' })
   @ApiParam({ name: 'id', description: 'Order ID', type: Number })
   @ApiParam({ name: 'marketId', description: 'Market ID', type: Number })
